@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Любимая ❤️ Навсегда</title>
+
+  <style>
+    body {margin:0; padding:0; overflow:hidden; font-family:'Segoe UI', sans-serif; background:black; color:white; text-align:center;}
+    canvas {position:fixed; top:0; left:0; z-index:0;}
+    .container {position:relative; z-index:2; top:50%; transform:translateY(-50%); padding:20px;}
+    h1 {font-size:40px; color:#ff4f81; text-shadow:0 0 20px #ff4f81;}
+    p {font-size:20px; line-height:1.6;}
+    .counter {margin:15px 0; font-weight:bold; font-size:20px; color:#ff9ab0;}
+    button {margin:10px; padding:12px 25px; font-size:16px; border:none; border-radius:25px; cursor:pointer; background:#ff4f81; color:white; transition:0.3s;}
+    button:hover {transform:scale(1.1); box-shadow:0 0 20px #ff4f81;}
+    .hidden {display:none; margin-top:15px; color:#ffb6c1;}
+    #heart {position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); font-size:100px; opacity:0.8; animation:pulse 2s infinite; z-index:1;}
+    @keyframes pulse {0% {transform:translate(-50%,-50%) scale(1);} 50% {transform:translate(-50%,-50%) scale(1.2);} 100% {transform:translate(-50%,-50%) scale(1);}}
+    .word {position:absolute; font-size:22px; color:#ff9ab0; opacity:0; white-space:nowrap; pointer-events:none;}
+    img.heartPhoto {position:absolute; width:60px; height:60px; border-radius:15px; opacity:0; pointer-events:none; transition:all 0.8s ease;}
+  </style>
+</head>
+
+<body>
+  <canvas id="stars"></canvas>
+  <div id="heart">💖</div>
+
+  
+
+<div class="container">
+    <h1>Любимая ❤️</h1>
+    <p>
+      С 05.05.2025 мы вместе.<br>
+      10.12.2025 мы стали мужем и женой.<br>
+      Мы любим, дорожим друг другом и самые счастливые люди.
+    </p>
+
+    <div class="counter" id="counter"></div>
+
+    <button id="btnOath">Моя клятва 💍</button>
+    <button id="btnForever">Навсегда ♾️</button>
+    <button id="btnSecret">Секретное послание 🔒</button>
+    <button id="btnHeartWords">Сердце из слов 💖</button>
+
+    <div class="hidden" id="oath">
+      Я обещаю быть рядом в радости и в трудности. Беречь тебя, поддерживать и любить сильнее с каждым днем. ❤️
+    </div>
+    <div class="hidden" id="forever">
+      Даже через 50 лет я буду смотреть на тебя так же, как в самый первый день. Ты — моя судьба. 🌟
+    </div>
+    <div class="hidden" id="secret">
+      Люблю тебя больше, чем вселенная звёзд 🌌<br>
+      Навсегда твой. 💖
+    </div>
+  </div>
+
+  <!-- Музыка: файл love.mp3 должен лежать рядом с этим HTML -->
+  <audio id="bgm" loop>
+    <source src="love.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    "use strict";
+
+    // ===== Даты =====
+    const startRelationship = new Date("2025-05-05T00:00:00");
+    const weddingDate = new Date("2025-12-10T00:00:00");
+
+    function daysBetween(from, to) {
+      return Math.floor((to - from) / (1000 * 60 * 60 * 24));
+    }
+
+    function updateCounter() {
+      const now = new Date();
+
+      const daysTogether = Math.max(0, daysBetween(startRelationship, now));
+      const daysMarriage = Math.max(0, daysBetween(weddingDate, now));
+
+      document.getElementById("counter").innerHTML =
+        `Мы вместе уже: <b>${daysTogether}</b> дней ❤️<br>` +
+        `Мы муж и жена уже: <b>${daysMarriage}</b> дней 💍`;
+    }
+
+    setInterval(updateCounter, 60000);
+    updateCounter();
+
+    // ===== Музыка (autoplay может блокироваться) =====
+    const bgm = document.getElementById("bgm");
+    function tryPlayMusic() {
+      if (!bgm) return;
+      bgm.play().catch(() => { /* браузер может блокировать */ });
+    }
+    // пробуем сразу
+    tryPlayMusic();
+    // и при первом взаимодействии
+    window.addEventListener("pointerdown", tryPlayMusic, { once: true });
+
+    // ===== Кнопки =====
+    const oathEl = document.getElementById("oath");
+    const foreverEl = document.getElementById("forever");
+    const secretEl = document.getElementById("secret");
+
+    document.getElementById("btnOath").addEventListener("click", () => {
+      oathEl.style.display = "block";
+      tryPlayMusic();
+    });
+
+    document.getElementById("btnForever").addEventListener("click", () => {
+      foreverEl.style.display = "block";
+      tryPlayMusic();
+    });
+
+    document.getElementById("btnSecret").addEventListener("click", () => {
+      secretEl.style.display = "block";
+      createPhotoHeart();
+      createStarsText();
+      tryPlayMusic();
+    });
+
+    document.getElementById("btnHeartWords").addEventListener("click", () => {
+      formHeartWords();
+      tryPlayMusic();
+    });
+
+    // ===== Звёзды =====
+    const canvas = document.getElementById("stars");
+    const ctx = canvas.getContext("2d");
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+
+    let stars = [];
+    function initStars() {
+      stars = [];
+      for (let i = 0; i < 300; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.5,
+          speed: Math.random() * 0.5
+        });
+      }
+    }
+    initStars();
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "white";
+
+      for (const s of stars) {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        s.y += s.speed;
+        if (s.y > canvas.height) s.y = 0;
+      }
+
+      requestAnimationFrame(drawStars);
+    }
+    drawStars();
+
+    // ===== Всплывающие слова =====
+    function fadeIn(el, step = 0.05, intervalMs = 50) {
+      let opacity = 0;
+      const interval = setInterval(() => {
+        opacity += step;
+        el.style.opacity = String(opacity);
+        if (opacity >= 1) clearInterval(interval);
+      }, intervalMs);
+    }
+
+    function createStarsText() {
+      for (let i = 0; i < 50; i++) {
+        const span = document.createElement("div");
+        span.textContent = "💖 Любимая 💖";
+        span.className = "word";
+        span.style.left = (Math.random() * 100) + "vw";
+        span.style.top = (Math.random() * 100) + "vh";
+        span.style.fontSize = (Math.random() * 25 + 15) + "px";
+        document.body.appendChild(span);
+
+        fadeIn(span);
+        setTimeout(() => span.remove(), 5000);
+      }
+    }
+
+    // ===== Сердце из слов =====
+    function formHeartWords() {
+      const words = "Я обещаю любить тебя Любимая навсегда беречь поддерживать каждый день".split(" ");
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      const scale = 10;
+
+      words.forEach((w, i) => {
+        setTimeout(() => {
+          const angle = (i / words.length) * Math.PI * 2;
+          const x = cx + scale * 16 * Math.pow(Math.sin(angle), 3);
+          const y = cy - scale * (
+            13 * Math.cos(angle)
+            - 5 * Math.cos(2 * angle)
+            - 2 * Math.cos(3 * angle)
+            - Math.cos(4 * angle)
+          );
+
+          const span = document.createElement("div");
+          span.textContent = w;
+          span.className = "word";
+          span.style.left = x + "px";
+          span.style.top = y + "px";
+          span.style.fontSize = "24px";
+          document.body.appendChild(span);
+
+          fadeIn(span);
+          setTimeout(() => span.remove(), 12000);
+        }, i * 500);
+      });
+    }
+
+    // ===== Фото-сердце =====
+    function createPhotoHeart() {
+      const photos = [
+        "photo1.jpg",
+        "photo2.jpg",
+        "photo3.jpg",
+        "photo4.jpg",
+        "photo5.jpg",
+        "photo6.jpg"
+      ];
+
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      const scale = 8;
+
+      photos.forEach((src, i) => {
+        const img = document.createElement("img");
+        img.src = src;
+        img.className = "heartPhoto";
+        document.body.appendChild(img);
+
+        const angle = (i / photos.length) * Math.PI * 2;
+        const x = cx + scale * 16 * Math.pow(Math.sin(angle), 3) - 30;
+        const y = cy - scale * (
+          13 * Math.cos(angle)
+          - 5 * Math.cos(2 * angle)
+          - 2 * Math.cos(3 * angle)
+          - Math.cos(4 * angle)
+        ) - 30;
+
+        setTimeout(() => {
+          img.style.left = x + "px";
+          img.style.top = y + "px";
+          img.style.opacity = "1";
+        }, i * 400);
+
+        setTimeout(() => img.remove(), 15000);
+      });
+    }
+
+    // ===== Адаптив =====
+    window.addEventListener("resize", () => {
+      resizeCanvas();
+      initStars();
+    });
+  </script>
+</body>
+</html>
